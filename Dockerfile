@@ -27,5 +27,4 @@ RUN /app/venv/bin/pip install --no-cache-dir --upgrade pip && \
 COPY . /app
 
 
-
 CMD ["python3", "main.py"]
