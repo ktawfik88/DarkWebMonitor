@@ -1,12 +1,11 @@
 import asyncio
 
 from appwrite.client import Client
-from fastapi import FastAPI
+from appwrite.query import Query
 
 from modules.database.DatabaseManager import DatabaseManager
 from modules.extract.DocumentProcessor import DocumentProcessor
 from modules.telegram.TelegramFileDownloader import TelegramFileDownloader
-import schedule
 from apscheduler.schedulers.background import BackgroundScheduler
 
 API_ID = '25300272'
@@ -25,6 +24,7 @@ downloader = TelegramFileDownloader(API_ID, API_HASH, phone, database, documentP
 
 
 async def start_telegram():
+    print("start telegram")
     await downloader.connect_telegram(phone)
     start_listening_task = asyncio.create_task(downloader.start_listening())
     await asyncio.gather(start_listening_task)

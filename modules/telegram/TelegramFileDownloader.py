@@ -110,7 +110,7 @@ class TelegramFileDownloader:
                                 data={
                                     "downloaded": True,
                                 })
-                            self.documentProcessor.process_documents_parallel_by_id(message_id=msg.id)
+                            await self.documentProcessor.process_documents_parallel_by_id(message_id=msg.id)
                         except FileReferenceExpiredError as e:
                             os.remove(zip_download_path)
                             result = self.databaseManager.update_document(

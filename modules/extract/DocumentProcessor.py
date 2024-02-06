@@ -139,6 +139,7 @@ class DocumentProcessor:
                 continue
 
         shutil.rmtree(extracted_folder)
+
         result = self.databaseManager.update_document(
             database_id="65b13882c47652982a05",
             collection_id="65b187d22e21dd4a9645",
@@ -146,6 +147,7 @@ class DocumentProcessor:
             data={
                 "completed": True
             })
+        shutil.rmtree(doc["file_path"])
 
     def process_documents(self):
         try:
@@ -178,14 +180,16 @@ class DocumentProcessor:
             print(f"Error processing documents in parallel {e}")
 
     def process_documents_parallel_by_id(self, message_id):
+        print("Start process_documents_parallel_by_id")
         try:
+            print("Start process_documents_parallel_by_id 2")
             documents = self.databaseManager.list_documents(
                 database_id="65b13882c47652982a05",
                 collection_id="65b187d22e21dd4a9645",
                 queries=[Query.equal("downloaded", True), Query.equal("completed", False), Query.is_null("error"),
                          Query.order_desc("$createdAt"), Query.equal("message_id", message_id), Query.limit(1)]
             )
-
+            print(documents)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 futures = [executor.submit(self.process_document, doc) for doc in documents]
                 concurrent.futures.wait(futures)
