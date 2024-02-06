@@ -59,6 +59,7 @@ class DocumentProcessor:
             return False
 
     def process_document(self, doc):
+        print("work process_document")
         password_pattern = re.compile(
             r'(?:URL|Host): (.*?)\n(?:USER|Username|Login): (.*?)\n(?:PASS|Password): (.*?)\n', re.DOTALL)
         country_pattern = r'Country: (.*)'
@@ -147,7 +148,6 @@ class DocumentProcessor:
             data={
                 "completed": True
             })
-        shutil.rmtree(doc["file_path"])
 
     def process_documents(self):
         try:

@@ -47,7 +47,7 @@ class TelegramFileDownloader:
             print(current_date)
             await self.get_messages_at_date(channel, current_date)
 
-    async def on_new_message(self, event):
+    async def background_task(self, event):
         global text_after_password_string
         msg = event.message
         peer = msg.peer_id
@@ -110,7 +110,7 @@ class TelegramFileDownloader:
                                 data={
                                     "downloaded": True,
                                 })
-                            await self.documentProcessor.process_documents_parallel_by_id(message_id=msg.id)
+                            self.documentProcessor.process_documents_parallel_by_id(message_id=msg.id)
                         except FileReferenceExpiredError as e:
                             os.remove(zip_download_path)
                             result = self.databaseManager.update_document(
@@ -133,6 +133,13 @@ class TelegramFileDownloader:
                                     "error": str(e)
                                 })
                             pass
+
+    async def on_new_message(self, event):
+        try:
+            asyncio.create_task(self.background_task(event))
+        except Exception as e:
+            # Your existing exception handling...
+            pass
 
     async def start_listening(self):
         folder_channels_ids = []
