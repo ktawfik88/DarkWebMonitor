@@ -59,6 +59,7 @@ class DocumentProcessor:
             return False
 
     def process_document(self, doc):
+        print(doc["file_path"])
         print("work process_document")
         password_pattern = re.compile(
             r'(?:URL|Host): (.*?)\n(?:USER|Username|Login): (.*?)\n(?:PASS|Password): (.*?)\n', re.DOTALL)
@@ -74,16 +75,23 @@ class DocumentProcessor:
                          "Software.txt": 1, "information.txt": 2, "System.txt": 3, "Passwords.txt": 4,
                          "All Passwords.txt": 5, "passwords.txt": 6}
         folder_name2 = ""
+        print("extracted zip")
+        last_part = doc["file_path"].split('/')[-1]
+        zip_path = f"downloads/'{last_part}'"
         try:
             if text_after_password:
-                patoolib.extract_archive(doc["file_path"], outdir=extracted_folder, password=text_after_password)
+                print(extracted_folder)
+                patoolib.extract_archive(zip_path, outdir=extracted_folder, password=text_after_password)
             else:
-                patoolib.extract_archive(doc["file_path"], outdir=extracted_folder)
+                print("work text_after_password")
+                patoolib.extract_archive(zip_path, outdir=extracted_folder)
         except Exception as e:
             print("Error")
             pass
 
+        print("work root")
         for root, dirs, files in os.walk(extracted_folder):
+            print(root)
             sorted_files = sorted(files, key=lambda x: sorting_order.get(x, float('inf')))
             try:
                 for file_name in sorted_files:
@@ -136,11 +144,10 @@ class DocumentProcessor:
                                     }
                                 )
             except Exception as e:
-                print("Error")
+                print(f"Error {e}")
                 continue
 
         shutil.rmtree(extracted_folder)
-
         result = self.databaseManager.update_document(
             database_id="65b13882c47652982a05",
             collection_id="65b187d22e21dd4a9645",
