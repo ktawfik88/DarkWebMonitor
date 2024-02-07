@@ -1,11 +1,27 @@
-import os
+import requests
+from fastapi import FastAPI
+from flask import session
 
-from modules.telegram.TelegramFileDownloader import ROOT_Scripts
+from modules.auth.AuthManager import AuthManager
+from modules.database.DatabaseManager import DatabaseManager
 
-filename = '''6436_1935880746_\360\237\246\201Manticore Cloud-Main Channel\342\230\201\357\270\216.rar'''
-decoded_filename = filename.encode('latin1').decode('utf-8')
-print(decoded_filename)
+from appwrite.query import Query
+from appwrite.id import ID
 
-unique_name = f'{343}_{3443}_Downloading 🦁Manticore Cloud-Main Channel☁︎.rar'
-file_path = os.path.join(ROOT_Scripts, unique_name)
-print(file_path)
+
+# https://github.com/Devsixth/webapp/blob/8a82eee6c904acff6717d73f7d54ffc00c2ef737/app.py#L47
+
+
+def authenticate_user(email, password):
+    url = "https://foxhat.org/v1/account/sessions/email"
+    headers = {'x-appwrite-project': "65af20b9daebac75cc9c"}
+    response = requests.post(url, headers=headers, json={'email': email, 'password': password})
+
+    if response.status_code == 201:
+        session_data = response.json()
+    else:
+        print('Authentication failed')
+        return None, None
+
+
+authenticate_user("ee20100112@gmail.com", "Eslam2020@@@")
