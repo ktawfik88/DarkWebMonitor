@@ -35,5 +35,4 @@ async def start_telegram():
 
 
 if __name__ == "__main__":
-    print("")
     asyncio.run(start_telegram())
