@@ -178,15 +178,13 @@ class DocumentProcessor:
                          "All Passwords.txt": 5, "passwords.txt": 6}
         folder_name2 = ""
         print("extracted zip")
-        last_part = file_path.split('/')[-1]
-        zip_path = f"downloads/'{last_part}'"
         try:
             if text_after_password:
                 print(extracted_folder)
-                patoolib.extract_archive(zip_path, outdir=extracted_folder, password=text_after_password)
+                patoolib.extract_archive(file_path, outdir=extracted_folder, password=text_after_password)
             else:
                 print("work text_after_password")
-                patoolib.extract_archive(zip_path, outdir=extracted_folder)
+                patoolib.extract_archive(file_path, outdir=extracted_folder)
         except Exception as e:
             print(f"Error {e}")
             pass
