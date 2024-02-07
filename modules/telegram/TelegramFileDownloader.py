@@ -72,6 +72,8 @@ class TelegramFileDownloader:
                 self.create_folder_if_not_exists(ROOT_Scripts)
                 unique_name = f'{msg.id}_{channel_id}_'
                 file_path = os.path.join(ROOT_Scripts, unique_name)
+                random_file_name = self.generate_random_filename()
+
                 if msg.media and hasattr(msg.media, 'document'):
                     document = msg.media.document
                     for attr in document.attributes:
@@ -86,8 +88,8 @@ class TelegramFileDownloader:
                             file_extension = ".zip"
                         elif document.mime_type == 'application/vnd.rar':
                             file_extension = ".rar"
-                        zip_download_path = f'{file_path}{self.generate_random_filename()}{file_extension}'
-                        file_name_2 = f'{self.generate_random_filename()}{file_extension}'
+                        zip_download_path = f'{file_path}{random_file_name}{file_extension}'
+                        file_name_2 = f'{random_file_name}{file_extension}'
                         text = msg.message
                         pattern = r'.pass: (.*)'
                         match = re.search(pattern, text)
