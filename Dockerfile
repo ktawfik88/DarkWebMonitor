@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     tor \
     p7zip-full \
     unzip \
+    unrar \
     && rm -rf /var/lib/apt/lists/* \
 
 ARG DEBIAN_FRONTEND=noninteractive
