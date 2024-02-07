@@ -7,7 +7,6 @@ from appwrite.client import Client
 from appwrite.services.account import Account
 from appwrite.services.users import Users
 
-from modules.auth.Auth import Auth
 
 
 class AuthManager:
@@ -21,8 +20,7 @@ class AuthManager:
         self.users = Users(self.client)
 
     def sign_up(self, email, password, user_id, name):
-        au = Auth(client=self.client).login(email=email, password=password)
-        print(au)
+
         try:
 
             user = self.users.create_argon2_user(user_id=user_id, email=email, password=password, name=name)

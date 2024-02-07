@@ -19,6 +19,7 @@ def authenticate_user(email, password):
 
     if response.status_code == 201:
         session_data = response.json()
+        print()
     else:
         print('Authentication failed')
         return None, None

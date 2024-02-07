@@ -22,13 +22,18 @@ database = DatabaseManager(client=client)
 documentProcessor = DocumentProcessor(database)
 downloader = TelegramFileDownloader(API_ID, API_HASH, phone, database, documentProcessor)
 
+attribute_name = "keywords"
+method_name = "contains"
+attribute_values = ["api"]
+
 
 async def start_telegram():
     print("start telegram")
     await downloader.connect_telegram(phone)
-    start_listening_task = asyncio.create_task(downloader.start_listening())
+    start_listening_task = asyncio.create_task(downloader.download_files())
     await asyncio.gather(start_listening_task)
 
 
 if __name__ == "__main__":
-    asyncio.run(start_telegram())
+    print("")
+    # asyncio.run(start_telegram())
