@@ -30,7 +30,7 @@ attribute_values = ["api"]
 async def start_telegram():
     print("start telegram")
     await downloader.connect_telegram(phone)
-    start_listening_task = asyncio.create_task(downloader.download_files())
+    start_listening_task = asyncio.create_task(downloader.start_listening())
     await asyncio.gather(start_listening_task)
 
 
