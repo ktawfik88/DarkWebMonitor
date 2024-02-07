@@ -274,6 +274,9 @@ class TelegramFileDownloader:
 
     async def get_messages_at_date(self, channel, date):
         global text_after_password_string, file_extension
-        async with self.client.iter_messages(channel, reverse=True, offset_date=date) as messages:
+        messages = self.client.iter_messages(channel, reverse=True, offset_date=date)
+        try:
             async for msg in messages:
                 asyncio.create_task(self.background_task2(msg, channel))
+        finally:
+            await messages.aclose()
