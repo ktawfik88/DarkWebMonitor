@@ -217,7 +217,6 @@ class DocumentProcessor:
                                 parsed_url = urlparse(url.strip())
                                 host = parsed_url.hostname
                                 main_domain = self.get_main_domain(url)
-                                print({"f": folder_name, "c": current_country, "url": url})
                                 self.databaseManager.create_document(
                                     database_id="65b13882c47652982a05",
                                     collection_id="65b1396263d312b93ee3",
