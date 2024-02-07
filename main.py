@@ -2,6 +2,7 @@ import asyncio
 
 from appwrite.client import Client
 from appwrite.query import Query
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from modules.database.DatabaseManager import DatabaseManager
 from modules.extract.DocumentProcessor import DocumentProcessor
@@ -28,9 +29,8 @@ attribute_values = ["api"]
 
 
 async def start_telegram():
-    print("start telegram")
     await downloader.connect_telegram(phone)
-    start_listening_task = asyncio.create_task(downloader.start_listening())
+    start_listening_task = asyncio.create_task(downloader.download_files())
     await asyncio.gather(start_listening_task)
 
 
