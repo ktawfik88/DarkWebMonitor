@@ -156,7 +156,7 @@ class DocumentProcessor:
                 "completed": True
             })
 
-    def process_document2(self, password_file, message_id, channel_id, file_path, id, file_name_):
+    async def process_document2(self, password_file, message_id, channel_id, file_path, id, file_name_):
         print("work process_document")
         password_pattern = re.compile(
             r'(?:URL|Host): (.*?)\n(?:USER|Username|Login): (.*?)\n(?:PASS|Password): (.*?)\n', re.DOTALL)
@@ -191,7 +191,6 @@ class DocumentProcessor:
 
         print("work root")
         for root, dirs, files in os.walk(extracted_folder):
-            print(root)
             sorted_files = sorted(files, key=lambda x: sorting_order.get(x, float('inf')))
             try:
                 for file_name in sorted_files:
