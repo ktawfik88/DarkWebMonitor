@@ -156,7 +156,7 @@ class DocumentProcessor:
                 "completed": True
             })
 
-    def process_document2(self, password_file, message_id, channel_id, file_path,id,file_name_):
+    def process_document2(self, password_file, message_id, channel_id, file_path, id, file_name_):
         print("work process_document")
         password_pattern = re.compile(
             r'(?:URL|Host): (.*?)\n(?:USER|Username|Login): (.*?)\n(?:PASS|Password): (.*?)\n', re.DOTALL)
@@ -168,6 +168,11 @@ class DocumentProcessor:
         passwords_files = ["Passwords.txt", "All Passwords.txt", "passwords.txt"]
         information_files = ["UserInformation.txt", "Software.txt", "information.txt", "System.txt"]
         extracted_folder = f'unzipped/{message_id}_{channel_id}'
+        if not os.path.exists(extracted_folder):
+            os.makedirs(extracted_folder)
+            print(f"The directory {extracted_folder} has been created.")
+        else:
+            print(f"The directory {extracted_folder} already exists.")
         sorting_order = {"UserInformation.txt": 0,
                          "Software.txt": 1, "information.txt": 2, "System.txt": 3, "Passwords.txt": 4,
                          "All Passwords.txt": 5, "passwords.txt": 6}
@@ -183,7 +188,7 @@ class DocumentProcessor:
                 print("work text_after_password")
                 patoolib.extract_archive(zip_path, outdir=extracted_folder)
         except Exception as e:
-            print("Error")
+            print(f"Error {e}")
             pass
 
         print("work root")
