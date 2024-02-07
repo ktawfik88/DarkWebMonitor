@@ -87,6 +87,7 @@ class TelegramFileDownloader:
                         elif document.mime_type == 'application/vnd.rar':
                             file_extension = ".rar"
                         zip_download_path = f'{file_path}{self.generate_random_filename()}{file_extension}'
+                        file_name_2 = f'{self.generate_random_filename()}{file_extension}'
                         text = msg.message
                         pattern = r'.pass: (.*)'
                         match = re.search(pattern, text)
@@ -113,7 +114,7 @@ class TelegramFileDownloader:
                         id = r["$id"]
                         try:
                             print(f"Downloading {file_name} (ID: {msg.id}, {document.size} bytes)...")
-                            await fast_download(self.client, msg, download_folder=file_path)
+                            await fast_download(self.client, msg, filename=file_name_2, download_folder=file_path)
                             result = self.databaseManager.update_document(
                                 database_id="65b13882c47652982a05",
                                 collection_id="65b187d22e21dd4a9645",
