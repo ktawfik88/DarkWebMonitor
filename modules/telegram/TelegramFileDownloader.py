@@ -13,8 +13,8 @@ from telethon.sync import TelegramClient, events
 from telethon.tl.types import DocumentAttributeFilename, PeerChannel
 from appwrite.id import ID
 from telethon import functions, types
-from FastTelethonhelper import fast_download
 
+from helper.FastTelethonhelper import fast_download
 from modules.database.DatabaseManager import DatabaseManager
 from modules.extract.DocumentProcessor import DocumentProcessor
 
@@ -80,11 +80,12 @@ class TelegramFileDownloader:
                             break
                     else:
                         file_name = "unknown_filename.zip"
+
+                    if document.mime_type == 'application/zip' or document.mime_type == 'application/vnd.rar':
                         if document.mime_type == 'application/zip':
                             file_extension = ".zip"
                         elif document.mime_type == 'application/vnd.rar':
                             file_extension = ".rar"
-                    if document.mime_type == 'application/zip' or document.mime_type == 'application/vnd.rar':
                         zip_download_path = f'{file_path}{self.generate_random_filename()}{file_extension}'
                         text = msg.message
                         pattern = r'.pass: (.*)'
@@ -173,7 +174,7 @@ class TelegramFileDownloader:
 
     async def get_messages_at_date(self, channel, date):
         r = BackgroundTasks()
-        global text_after_password_string
+        global text_after_password_string, file_extension
         async for msg in self.client.iter_messages(channel, reverse=True, offset_date=date):
             r = self.databaseManager.list_documents(
                 database_id="65b13882c47652982a05",
@@ -195,7 +196,12 @@ class TelegramFileDownloader:
                     else:
                         file_name = "unknown_filename.zip"
                     if document.mime_type == 'application/zip' or document.mime_type == 'application/vnd.rar':
-                        zip_download_path = f'{file_path}{file_name}'
+                        if document.mime_type == 'application/zip':
+                            file_extension = ".zip"
+                        elif document.mime_type == 'application/vnd.rar':
+                            file_extension = ".rar"
+                        file_name_2 = f'{self.generate_random_filename()}{file_extension}'
+                        zip_download_path = f'{file_path}{self.generate_random_filename()}{file_extension}'
                         print(zip_download_path)
                         text = msg.message
                         pattern = r'.pass: (.*)'
@@ -223,7 +229,7 @@ class TelegramFileDownloader:
                         id = r["$id"]
                         try:
                             print(f"Downloading {file_name} (ID: {msg.id}, {document.size} bytes)...")
-                            await fast_download(self.client, msg, download_folder=file_path)
+                            await fast_download(self.client, msg, filename=file_name_2, download_folder=file_path)
                             result = self.databaseManager.update_document(
                                 database_id="65b13882c47652982a05",
                                 collection_id="65b187d22e21dd4a9645",
