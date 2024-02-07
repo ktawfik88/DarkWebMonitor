@@ -1,7 +1,9 @@
 import asyncio
 import os
 import datetime
+import random
 import re
+import string
 
 import pytz
 from appwrite.query import Query
@@ -28,6 +30,10 @@ class TelegramFileDownloader:
         self.documentProcessor = documentProcessor
         self.client = None
 
+    def generate_random_filename(self, length=10):
+        letters_and_digits = string.ascii_letters + string.digits
+        return ''.join(random.choice(letters_and_digits) for _ in range(length))
+
     async def connect_telegram(self, phone):
         self.client = TelegramClient(phone, self.api_id, self.api_hash)
         await self.client.connect()
@@ -48,7 +54,7 @@ class TelegramFileDownloader:
             await self.get_messages_at_date(channel, current_date)
 
     async def background_task(self, event):
-        global text_after_password_string
+        global text_after_password_string, file_extension
         msg = event.message
         peer = msg.peer_id
         print(peer)
@@ -74,8 +80,12 @@ class TelegramFileDownloader:
                             break
                     else:
                         file_name = "unknown_filename.zip"
+                        if document.mime_type == 'application/zip':
+                            file_extension = ".zip"
+                        elif document.mime_type == 'application/vnd.rar':
+                            file_extension = ".rar"
                     if document.mime_type == 'application/zip' or document.mime_type == 'application/vnd.rar':
-                        zip_download_path = f'{file_path}{file_name}'
+                        zip_download_path = f'{file_path}{self.generate_random_filename()}{file_extension}'
                         text = msg.message
                         pattern = r'.pass: (.*)'
                         match = re.search(pattern, text)
@@ -110,7 +120,10 @@ class TelegramFileDownloader:
                                 data={
                                     "downloaded": True,
                                 })
-                            self.documentProcessor.process_document2(password_file=text_after_password_string,message_id=msg.id,channel_id=channel_id,file_path=zip_download_path,id=id,file_name_=file_name)
+                            self.documentProcessor.process_document2(password_file=text_after_password_string,
+                                                                     message_id=msg.id, channel_id=channel_id,
+                                                                     file_path=zip_download_path, id=id,
+                                                                     file_name_=file_name)
                         except FileReferenceExpiredError as e:
                             os.remove(zip_download_path)
                             result = self.databaseManager.update_document(
