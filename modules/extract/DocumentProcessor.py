@@ -156,7 +156,7 @@ class DocumentProcessor:
                 "completed": True
             })
 
-    def process_document2(self, password_file, message_id, channel_id, file_path, id, file_name_):
+    async def process_document2(self, password_file, message_id, channel_id, file_path, id, file_name_):
         print("work process_document")
         password_pattern = re.compile(
             r'(?:URL|Host): (.*?)\n(?:USER|Username|Login): (.*?)\n(?:PASS|Password): (.*?)\n', re.DOTALL)
