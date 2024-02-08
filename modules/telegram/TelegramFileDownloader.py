@@ -152,103 +152,6 @@ class TelegramFileDownloader:
                                 })
                             pass
 
-    async def background_task2(self, event, channel):
-        global text_after_password_string, file_extension
-        msg = event
-        channel_id = channel.id
-        r = self.databaseManager.list_documents(
-            database_id="65b13882c47652982a05",
-            collection_id="65b187d22e21dd4a9645",
-            queries=[Query.equal("message_id", msg.id), Query.equal("downloaded", True), Query.limit(1)]
-        )
-        print(r)
-        if r["total"] == 0:
-            message_date = msg.date
-            date_str = message_date.strftime('%Y-%m-%d')
-            self.create_folder_if_not_exists(ROOT_Scripts)
-            unique_name = f'{msg.id}_{channel_id}_'
-            file_path = os.path.join(ROOT_Scripts, unique_name)
-            random_file_name = self.generate_random_filename()
-
-            if msg.media and hasattr(msg.media, 'document'):
-                document = msg.media.document
-                for attr in document.attributes:
-                    if isinstance(attr, DocumentAttributeFilename):
-                        file_name = attr.file_name
-                        break
-                else:
-                    file_name = "unknown_filename.zip"
-
-                if document.mime_type == 'application/zip' or document.mime_type == 'application/vnd.rar':
-                    if document.mime_type == 'application/zip':
-                        file_extension = ".zip"
-                    elif document.mime_type == 'application/vnd.rar':
-                        file_extension = ".rar"
-                    zip_download_path = f'{file_path}{random_file_name}{file_extension}'
-                    file_name_2 = f'{random_file_name}{file_extension}'
-                    text = msg.message
-                    pattern = r'.pass: (.*)'
-                    match = re.search(pattern, text)
-                    if match:
-                        text_after_password = match.group(1).encode('utf-8')
-                        emoji_bytes = b'\xe2\x9e\x96'
-                        if text_after_password == emoji_bytes:
-                            text_after_password_string = None
-                        else:
-                            text_after_password_string = match.group(1)
-                    r = self.databaseManager.create_document(
-                        database_id="65b13882c47652982a05",
-                        collection_id="65b187d22e21dd4a9645",
-                        document_id=ID.unique(),
-                        data={
-                            "channel_id": channel_id,
-                            "message_id": msg.id,
-                            "file_name": file_name,
-                            "file_path": zip_download_path,
-                            "password_file": text_after_password_string
-                        }
-
-                    )
-                    id = r["$id"]
-                    try:
-                        print(f"Downloading {file_name} (ID: {msg.id}, {document.size} bytes)...")
-                        await fast_download(self.client, msg, filename=file_name_2, download_folder=file_path)
-                        result = self.databaseManager.update_document(
-                            database_id="65b13882c47652982a05",
-                            collection_id="65b187d22e21dd4a9645",
-                            document_id=id,
-                            data={
-                                "downloaded": True,
-                            })
-                        asyncio.create_task(
-                            self.documentProcessor.process_document2(password_file=text_after_password_string,
-                                                                     message_id=msg.id, channel_id=channel_id,
-                                                                     file_path=zip_download_path, id=id,
-                                                                     file_name_=file_name))
-
-                    except FileReferenceExpiredError as e:
-                        os.remove(zip_download_path)
-                        result = self.databaseManager.update_document(
-                            database_id="65b13882c47652982a05",
-                            collection_id="65b187d22e21dd4a9645",
-                            document_id=id,
-                            data={
-                                "downloaded": False,
-                                "error": e.message
-                            })
-                        pass
-                    except Exception as e:
-                        os.remove(zip_download_path)
-                        result = self.databaseManager.update_document(
-                            database_id="65b13882c47652982a05",
-                            collection_id="65b187d22e21dd4a9645",
-                            document_id=id,
-                            data={
-                                "downloaded": False,
-                                "error": str(e)
-                            })
-                        pass
-
     async def on_new_message(self, event):
         try:
             asyncio.create_task(self.background_task(event))
@@ -275,6 +178,97 @@ class TelegramFileDownloader:
             os.makedirs(folder_path)
 
     async def get_messages_at_date(self, channel, date):
+        r = BackgroundTasks()
         global text_after_password_string, file_extension
         async for msg in self.client.iter_messages(channel, reverse=True, offset_date=date):
-            await self.background_task2(msg, channel)
+
+            r = self.databaseManager.list_documents(
+                database_id="65b13882c47652982a05",
+                collection_id="65b187d22e21dd4a9645",
+                queries=[Query.equal("message_id", msg.id), Query.equal("downloaded", True), Query.limit(1)]
+            )
+            if r["total"] == 0:
+                message_date = msg.date
+                date_str = message_date.strftime('%Y-%m-%d')
+                self.create_folder_if_not_exists(ROOT_Scripts)
+                unique_name = f'{msg.id}_{channel.id}_'
+                file_path = os.path.join(ROOT_Scripts, unique_name)
+                random_file_name = self.generate_random_filename()
+                if msg.media and hasattr(msg.media, 'document'):
+                    document = msg.media.document
+                    for attr in document.attributes:
+                        if isinstance(attr, DocumentAttributeFilename):
+                            file_name = attr.file_name
+                            break
+                    else:
+                        file_name = "unknown_filename.zip"
+                    if document.mime_type == 'application/zip' or document.mime_type == 'application/vnd.rar':
+                        if document.mime_type == 'application/zip':
+                            file_extension = ".zip"
+                        elif document.mime_type == 'application/vnd.rar':
+                            file_extension = ".rar"
+                        zip_download_path = f'{file_path}{random_file_name}{file_extension}'
+                        file_name_2 = f'{random_file_name}{file_extension}'
+                        print(zip_download_path)
+                        text = msg.message
+                        pattern = r'.pass: (.*)'
+                        match = re.search(pattern, text)
+                        if match:
+                            text_after_password = match.group(1).encode('utf-8')
+                            emoji_bytes = b'\xe2\x9e\x96'
+                            if text_after_password == emoji_bytes:
+                                text_after_password_string = None
+                            else:
+                                text_after_password_string = match.group(1)
+                        r = self.databaseManager.create_document(
+                            database_id="65b13882c47652982a05",
+                            collection_id="65b187d22e21dd4a9645",
+                            document_id=ID.unique(),
+                            data={
+                                "channel_id": channel.id,
+                                "message_id": msg.id,
+                                "file_name": file_name,
+                                "file_path": zip_download_path,
+                                "password_file": text_after_password_string
+                            }
+
+                        )
+                        id = r["$id"]
+                        try:
+                            print(f"Downloading {file_name} (ID: {msg.id}, {document.size} bytes)...")
+                            await fast_download(self.client, msg, filename=file_name_2, download_folder=file_path)
+                            result = self.databaseManager.update_document(
+                                database_id="65b13882c47652982a05",
+                                collection_id="65b187d22e21dd4a9645",
+                                document_id=id,
+                                data={
+                                    "downloaded": True,
+                                })
+                            asyncio.create_task(
+                                self.documentProcessor.process_document2(password_file=text_after_password_string,
+                                                                         message_id=msg.id, channel_id=channel.id,
+                                                                         file_path=zip_download_path, id=id,
+                                                                         file_name_=file_name))
+
+                        except FileReferenceExpiredError as e:
+                            os.remove(zip_download_path)
+                            result = self.databaseManager.update_document(
+                                database_id="65b13882c47652982a05",
+                                collection_id="65b187d22e21dd4a9645",
+                                document_id=id,
+                                data={
+                                    "downloaded": False,
+                                    "error": e.message
+                                })
+                            pass
+                        except Exception as e:
+                            os.remove(zip_download_path)
+                            result = self.databaseManager.update_document(
+                                database_id="65b13882c47652982a05",
+                                collection_id="65b187d22e21dd4a9645",
+                                document_id=id,
+                                data={
+                                    "downloaded": False,
+                                    "error": str(e)
+                                })
+                            pass
