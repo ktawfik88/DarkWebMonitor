@@ -279,4 +279,7 @@ class TelegramFileDownloader:
             async for msg in messages:
                 asyncio.create_task(self.background_task2(msg, channel))
         finally:
-            await messages.aclose()
+            try:
+                await messages.close()
+            except AttributeError:
+                pass
