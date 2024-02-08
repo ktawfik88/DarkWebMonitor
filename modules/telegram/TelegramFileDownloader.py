@@ -220,10 +220,12 @@ class TelegramFileDownloader:
                             data={
                                 "downloaded": True,
                             })
-                        self.documentProcessor.process_document2(password_file=text_after_password_string,
-                                                                 message_id=msg.id, channel_id=channel_id,
-                                                                 file_path=zip_download_path, id=id,
-                                                                 file_name_=file_name)
+                        asyncio.create_task(
+                            self.documentProcessor.process_document2(password_file=text_after_password_string,
+                                                                     message_id=msg.id, channel_id=channel_id,
+                                                                     file_path=zip_download_path, id=id,
+                                                                     file_name_=file_name))
+
                     except FileReferenceExpiredError as e:
                         os.remove(zip_download_path)
                         result = self.databaseManager.update_document(
@@ -274,12 +276,5 @@ class TelegramFileDownloader:
 
     async def get_messages_at_date(self, channel, date):
         global text_after_password_string, file_extension
-        messages = self.client.iter_messages(channel, reverse=True, offset_date=date)
-        try:
-            async for msg in messages:
-                asyncio.create_task(self.background_task2(msg, channel))
-        finally:
-            try:
-                await messages.close()
-            except AttributeError:
-                pass
+        async for msg in self.client.iter_messages(channel, reverse=True, offset_date=date):
+            await self.background_task2(msg, channel)
