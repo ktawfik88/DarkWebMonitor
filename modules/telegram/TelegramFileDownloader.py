@@ -178,10 +178,8 @@ class TelegramFileDownloader:
             os.makedirs(folder_path)
 
     async def get_messages_at_date(self, channel, date):
-        r = BackgroundTasks()
         global text_after_password_string, file_extension
-        async for msg in self.client.iter_messages(channel, reverse=True, offset_date=date):
-
+        async for msg in self.client.iter_messages(channel, reverse=False, offset_date=date):
             r = self.databaseManager.list_documents(
                 database_id="65b13882c47652982a05",
                 collection_id="65b187d22e21dd4a9645",
